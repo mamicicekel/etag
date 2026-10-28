@@ -62,6 +62,33 @@ describe('etag(entity)', function () {
       }
       assert.strictEqual(etag(fakeStat), 'W/"bd3-14831b399d8"')
     })
+
+    it('should accept bigint ino and size from fs.stat bigint:true', function () {
+      var BigIntCtor = typeof global.BigInt === 'function' ? global.BigInt : null
+      if (!BigIntCtor) return
+      var fakeStat = {
+        ctime: new Date('2014-09-01T14:52:07Z'),
+        mtime: new Date('2014-09-01T14:52:07Z'),
+        ino: BigIntCtor(0),
+        size: BigIntCtor(3027)
+      }
+      assert.strictEqual(etag(fakeStat), 'W/"bd3-14831b399d8"')
+    })
+  })
+
+  describe('when "entity" is a bigint fs.Stats', function () {
+    it('should generate a weak ETag', function () {
+      var BigIntCtor = typeof global.BigInt === 'function' ? global.BigInt : null
+      var stat
+      try {
+        stat = fs.statSync(__filename, { bigint: true })
+      } catch (err) {
+        return
+      }
+      if (!BigIntCtor || stat.ino !== BigIntCtor(stat.ino)) return
+      assert.ok(isweak(etag(stat)))
+      assert.strictEqual(etag(stat), etag(stat))
+    })
   })
 
   describe('with "weak" option', function () {

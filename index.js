@@ -108,11 +108,27 @@ function isstats (obj) {
   }
 
   // quack quack
+  // Node bigint stats are not `instanceof fs.Stats` and use bigint ino/size.
   return obj && typeof obj === 'object' &&
     'ctime' in obj && toString.call(obj.ctime) === '[object Date]' &&
     'mtime' in obj && toString.call(obj.mtime) === '[object Date]' &&
-    'ino' in obj && typeof obj.ino === 'number' &&
-    'size' in obj && typeof obj.size === 'number'
+    'ino' in obj && isNumberOrBigInt(obj.ino) &&
+    'size' in obj && isNumberOrBigInt(obj.size)
+}
+
+function isNumberOrBigInt (value) {
+  if (typeof value === 'number') {
+    return true
+  }
+  var BigIntCtor = typeof global !== 'undefined' && global.BigInt
+  if (typeof BigIntCtor !== 'function') {
+    return false
+  }
+  try {
+    return value === BigIntCtor(value)
+  } catch (err) {
+    return false
+  }
 }
 
 /**

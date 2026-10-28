@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Support `fs.Stats` from `stat({ bigint: true })` (bigint `ino`/`size`)
+
 1.8.1 / 2017-09-12
 ==================
 
